@@ -1,0 +1,8 @@
+Package: saggau_automl
+Authors@R:
+  person(given = "Daniel", 
+         family = "Saggau", 
+         email = daniel.saggau@gmail.com)
+
+Desctiption:
+Depends:
