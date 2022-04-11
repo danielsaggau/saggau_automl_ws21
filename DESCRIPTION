@@ -1,14 +1,14 @@
 Package: saggau_automl
-Title: AutoML package for class  
+Title: AutoML package for class 
 Authors@R:
   person(given = "Daniel", 
          family = "Saggau", 
          email = daniel.saggau@gmail.com)
-
 Desctiption:
 Depends:
     R (>= 3.1.0)
 Imports:
-    mlr3 (>= ),
-    mlr3oml ()
+    mlr3 (>=0.13.3),
+    mlr3oml (>=0.5.0),
+    data.table(>=1.14.2)
 Encoding: UTF-8
