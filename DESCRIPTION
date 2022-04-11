@@ -1,4 +1,5 @@
 Package: saggau_automl
+Title: AutoML package for class  
 Authors@R:
   person(given = "Daniel", 
          family = "Saggau", 
@@ -8,5 +9,6 @@ Desctiption:
 Depends:
     R (>= 3.1.0)
 Imports:
-    mlr3 (>= )
+    mlr3 (>= ),
     mlr3oml ()
+Encoding: UTF-8
