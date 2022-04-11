@@ -11,4 +11,5 @@ Imports:
     mlr3 (>=0.13.3),
     mlr3oml (>=0.5.0),
     data.table(>=1.14.2)
+    bbotk(>= 0.5.2)
 Encoding: UTF-8
