@@ -72,9 +72,23 @@ extract_inner_tuning_results(rr)
 
 ############################################################################################################################################
 
+library(mlr3pipelines)
+library(xgboost)
 
+# retrieve the task from mlr3
+task = tsk("pima")
 
+# create data frame with categorized pressure feature
+data = task$data(cols = "pressure")
+breaks = quantile(data$pressure, probs = c(0, 0.33, 0.66, 1), na.rm = TRUE)
+data$pressure = cut(data$pressure, breaks, labels = c("low", "mid", "high"))
 
+# overwrite the feature in the task
+task$cbind(data)
 
+# generate a quick textual overview
+skimr::skim(task$data())
 
+learner = lrn("classif.xgboost", nrounds = 100, id = "xgboost", verbose = 0)
 
+round(task$missings() / task$nrow, 2)
