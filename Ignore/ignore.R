@@ -124,3 +124,24 @@ rr = resample(task = task, learner = graph_learner, resampling = resampling)
 rr$score()[, c("iteration", "task_id", "learner_id", "resampling_id", "classif.ce"), with = FALSE]
 as.data.table(graph_learner$param_set)[, c("id", "class", "lower", "upper", "nlevels"), with = FALSE]
 
+############################################################################################################################################
+
+
+library(mlr3verse)
+
+future::plan("multisession")
+future::plan("multicore")
+
+if (future::supportsMulticore()) {
+  future::plan(future::multicore)
+} else {
+  future::plan(future::multisession)
+}
+
+future::plan("multisession")
+
+task = tsk("pima")
+learner = lrn("classif.rpart") # classification tree
+resampling = rsmp("cv", folds = 3)
+
+resample(task, learner, resampling)
