@@ -1,5 +1,6 @@
 Package: saggau_automl
-Title: AutoML package for class 
+Title: AutoML Function for the Class Project
+Version: 0.0.0.1
 Authors@R:
   person(given = "Daniel", 
          family = "Saggau", 
@@ -8,10 +9,11 @@ Desctiption:
 Depends:
     R (>= 3.1.0)
 Imports:
-    mlr3 (>=0.13.3),
-    mlr3verse(),
-    mlr3oml (>=0.5.0),
-    data.table (>=1.14.2),
+    mlr3 (>= 0.13.3),
+    mlr3verse(>= 0.2.4),
+    mlr3oml (>= 0.5.0),
+    data.table (>= 1.14.2),
     bbotk (>= 0.5.2),
-    xgboost (>= 1.5.2.1)
+    xgboost (>= 1.5.2.1),
+    DiceKriging (>= 1.6.0),
 Encoding: UTF-8

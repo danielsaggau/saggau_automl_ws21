@@ -92,3 +92,35 @@ skimr::skim(task$data())
 learner = lrn("classif.xgboost", nrounds = 100, id = "xgboost", verbose = 0)
 
 round(task$missings() / task$nrow, 2)
+mlr_pipeops$keys("^impute")
+
+imputer = po("imputeoor")
+print(imputer)
+
+task_imputed = imputer$train(list(task))[[1]]
+task_imputed$missings()
+
+rbind(
+  task$data()[8,],
+  task_imputed$data()[8,]
+)
+
+factor_encoding = po("encode", method = "one-hot")
+
+graph = po("encode") %>>%
+  po("imputeoor") %>>%
+  learner
+plot(graph)
+
+
+graph_learner = as_learner(graph)
+
+# short learner id for printing
+graph_learner$id = "graph_learner"
+
+resampling = rsmp("cv", folds = 3)
+
+rr = resample(task = task, learner = graph_learner, resampling = resampling)
+rr$score()[, c("iteration", "task_id", "learner_id", "resampling_id", "classif.ce"), with = FALSE]
+as.data.table(graph_learner$param_set)[, c("id", "class", "lower", "upper", "nlevels"), with = FALSE]
+
