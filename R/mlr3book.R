@@ -1,3 +1,84 @@
+
+library(mlr3)
+
+data("mtcars", package = "datasets")
+data = mtcars[, 1:3]
+str(data)
+
+task_mtcars = as_task_regr(data, target = "mpg", id = "cars")
+print(task_mtcars)
+
+library("mlr3viz")
+autoplot(task_mtcars, type = "pairs")
+
+mlr_tasks
+
+as.data.table(mlr_tasks)
+
+task_penguins = tsk("penguins")
+print(task_penguins)
+
+
+library("mlr3verse")
+as.data.table(mlr_tasks)[, 1:4]
+
+help("mlr_tasks_german_credit")
+
+task_penguins$help()
+
+task_mtcars
+task_mtcars$data()
+task_mtcars$feature_names
+summary(as.data.table(task_mtcars))
+
+# during construction
+data("Sonar", package = "mlbench")
+task = as_task_classif(Sonar, target = "Class", positive = "R")
+
+# switch positive class to level 'M'
+task$positive = "M"
+
+print(task_mtcars$col_roles)
+
+# with `keep.rownames`, data.table stores the row names in an extra column "rn"
+data = as.data.table(datasets::mtcars[, 1:3], keep.rownames = TRUE)
+task_mtcars = as_task_regr(data, target = "mpg", id = "cars")
+
+# there is a new feature called "rn"
+task_mtcars$feature_names
+
+names(task_mtcars$col_roles)
+
+# assign column "rn" the role "name", remove from other roles
+task_mtcars$set_col_roles("rn", roles = "name")
+
+# note that "rn" not listed as feature anymore
+task_mtcars$feature_names
+
+task_penguins = tsk("penguins")
+task_penguins$select(c("body_mass", "flipper_length")) # keep only these features
+task_penguins$filter(1:3) # keep only these rows
+task_penguins$head()
+
+task_penguins$cbind(data.frame(letters = letters[1:3])) # add column letters
+task_penguins$head()
+
+library("mlr3viz")
+
+# get the pima indians task
+task = tsk("pima")
+
+# subset task to only use the 3 first features
+task$select(head(task$feature_names, 3))
+
+# default plot: class frequencies
+autoplot(task)
+
+
+
+
+
+################################################################################
 library("mlr3pipelines")
 library(mlr3)
 as.data.table(mlr_pipeops)
@@ -199,3 +280,16 @@ op_boost = po("learner",lrn("classif.xgboost"))
 
 glrn = as_learner(gr %>>% op_boost)
 glrn$param_set
+
+
+################################################################################
+
+library("mlr3verse")
+
+learner = lrn("classif.ranger")
+learner$param_set$ids(tags = "threads")
+
+
+
+
+
