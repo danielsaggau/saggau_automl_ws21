@@ -15,8 +15,8 @@ task = tsks(task))
 learner = lrn("classif.xgboost", # based on default values
               eta = to_tune(lower = 1e-04, upper =1 , logscale = TRUE),
               nrounds = to_tune(lower = 1e+00, upper = 5000, logscale= FALSE),
-              max_depth = to_tune(lower = 1e+00, upper 20= , logscale =FALSE),
-              colsample_bytree = to_tune(lower = 1e-01, upper=1, logscale= FALSE),
+              max_depth = to_tune(lower = 1e+00, upper =20 , logscale =FALSE),
+              colsample_bytree = to_tune(lower = 1e-01, upper = 1, logscale= FALSE),
               colsample_bylevel = to_tune(lower = 1e-01, upper= 1, logscale = FALSE),
               lambda = to_tune(lower = 1e-03 , upper = 1000, logscale = TRUE),
               alpha = to_tune(lower = 1e-03, upper = 1000, logscale = TRUE),
@@ -34,7 +34,6 @@ tuner = tnr("grid_search", batch_size =10)
 resampling = rsmps("cv", folds = 10)
 
 instance = tune(
-  method = tuner,
   task = task,
   leaarner = learner,
   resampling = resampling,
@@ -44,22 +43,30 @@ instance = tune(
 
 
 instance$results
-
 learner$param_set$values = instance$result_learner_param_vals
-
-#learner$train(task) make sense here ?
-
-
-
-
-
 }
 
 automl(
 task = c(madeline,madelon),
 learner = "xgboost",
 measures = c("classif_auc","time_train"),
-terminator = evals20,
+terminator = ("evals",n_evals = 20)
 filter = "auc"
 )
+
+##############################################################################
+
+instance = tune(
+  task = madeline_tsk,
+  method = "grid_search" ,
+  learner = learner,
+  resampling = rsmp("cv", folds = 10),
+  measure = msrs(c("time_train")),
+  terminator = ("evals",n_evals = 20)#,
+#  term_evals = 8
+)
+
+
+
+as_classif
 
