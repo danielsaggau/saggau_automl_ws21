@@ -1,5 +1,5 @@
 # pipeline
-# @requirement require("mlr3pipelines"), library("magrittr")
+# @requirement library(bbtok) require("mlr3pipelines"), library(mlr3tuning),library("magrittr") library("paradox")
 as.data.table(mlr_pipeops)
 xgboost = mlr_pipeops$get("learner", lrn("classif.xgboost"))
 filter = po("filter",
@@ -26,19 +26,35 @@ glrn$param_set$values$variance.filter.frac = 0.25
 cv10 = rsmp("cv", folds = 10)
 resample(task, glrn, cv10)
 
+search_space = ps(
+    variance.filter.frac = p_dbl(lower = 0.25, upper = 1),
+    classif.xgboost.lambda = p_dbl(lower = 1e-03 , upper = 1000),
+    classif.xgboost.eta = p_dbl(lower = 1e-04, upper =1),
+    classif.xgboost.nrounds = p_int(lower = 1, upper = 500)
+  )
 
-search_space =
-
-
-library("paradox")
 instance = TuningInstanceMultiCrit$new(
   task = task,
   learner = glrn,
-  resampling = rsmp("holdout"),
-  measure = msrs(c("classif.ce", "time_train")),
+  resampling = rsmp("cv", folds =10),
+  measure = msrs(c("classif.ce")),
   search_space = search_space,
   terminator = trm("evals", n_evals = 20)
 )
+instance
 
-tuner = tnr("random_search")
+tuner = tnr("grid_search", resolution =5)
 tuner$optimize(instance)
+
+
+
+instance$result_learner_param_vals
+instance$result_y
+instance$result_learner_param_vals[]
+as.data.table(instance$result_learner_param_vals)
+glrn$param_set$values
+op_graph = po("learner", lrn("classif.xgboost"))
+op_graph$param_set
+glrn = as_learner(gr %>>% op_rpart)
+glrn$param_set
+gr = op_graph %>>% po("scale")
