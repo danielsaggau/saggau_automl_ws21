@@ -5,11 +5,19 @@ source("pareto")
 
 ## baseline
 
+graph =
+  po("learner",
+     learner = lrn("classif.avg"))
+
+graph$predict(test.idx)
 
 ## random forest
+graph =
+  po("learner",
+     learner = lrn("classif.randomForest"))
 
 
-
+graph$predict(test.idx)
 
 
 ## ggplot to visualize results
