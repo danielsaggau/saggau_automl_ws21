@@ -3,18 +3,25 @@ source("dataloader.R")
 source("objective.R")
 source("pareto")
 
-##
+## baseline
 
-tsk_madeline = as_task_classif(madeline, target = "class")
-tsk_madelon = as_task_classif(madelon, target = "Class")
 
-##
+## random forest
+
 
 
 
 
 ## ggplot to visualize results
 
+ggplot(data = data, aes(x = , y= ))
++ geom_points()
+
+ggplot(data = data, aes(x = , y= ))
++ geom_points()
+
+ggplot(data = data, aes(x = , y= ))
++ geom_points()
 
 
 

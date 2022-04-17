@@ -5,7 +5,7 @@ oml_data = OMLData$new(41144)
 madeline = oml_data$data
 
 madeline_tsk = as_task_classif(
-madeline, target = "class")
+madeline, target = "class",# predict_type = "prob")
 
 
 test.idx = sample(seq_len(task$nrow), 30)
@@ -39,3 +39,12 @@ task$row_roles$use = train.idx
 #madelon_tsk = TaskClassif$new(id ="madelon",
 #                              backend = as_data_backend(madelon),
 #                              target = "Class")
+
+
+####---------------------------------####---------------------------------
+
+
+
+
+
+
