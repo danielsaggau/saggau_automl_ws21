@@ -1,11 +1,10 @@
+# @param eta
+# @param lambda
 # @param lower (`) set based on experience
 # @param upper (``) set based on experience
 # @return search space
 
-
 search_space = ps(
-  cp = p_dbl(lower = lower, upper = upper),
-  minsplit = p_int(lower = 1, upper = 10)
+  eta = p_dbl(lower = 1e-04, upper =1),
+  lambda = p_dbl(lower = 1e-03 , upper = 1000)
 )
-search_space
-

@@ -7,66 +7,35 @@
 #@ input param: filter
 #@ output:
 
-automl = function(task, learner = NULL, filter = NULL ,measure = NULL, terminator = NULL){
+search_space = ps()
+search_space = ps(
+  eta = p_dbl(lower = 1e-04, upper =1),
+  lambda = p_dbl(lower = 1e-03 , upper = 1000)
+)
+#automl = function(task, learner = NULL, filter = NULL ,measure = NULL, terminator = NULL){
 benchmarkgrid( # unsure whether combinable
 
-task = tsks(task))
-
-learner = lrn("classif.xgboost", # based on default values
-              eta = to_tune(lower = 1e-04, upper =1 , logscale = TRUE),
-              nrounds = to_tune(lower = 1e+00, upper = 5000, logscale= FALSE),
-              max_depth = to_tune(lower = 1e+00, upper =20 , logscale =FALSE),
-              colsample_bytree = to_tune(lower = 1e-01, upper = 1, logscale= FALSE),
-              colsample_bylevel = to_tune(lower = 1e-01, upper= 1, logscale = FALSE),
-              lambda = to_tune(lower = 1e-03 , upper = 1000, logscale = TRUE),
-              alpha = to_tune(lower = 1e-03, upper = 1000, logscale = TRUE),
-              subsample= to_tune(lower = 1e-01, upper = 1, logscale = FALSE)
-)
-
-measures = msrs(measures)
-
-terminator =  terminator
-
-filter = flt(filter)
-
-tuner = tnr("grid_search", batch_size =10)
-
-resampling = rsmps("cv", folds = 10)
-
-instance = tune(
-  task = task,
-  leaarner = learner,
-  resampling = resampling,
-  measure = measures,
-  term_evals = 50
-)
+#task = tsks(task))
 
 
-instance$results
-learner$param_set$values = instance$result_learner_param_vals
-}
+#instance$result_learner_param_vals
+#learner$param_set$values = instance$result_learner_param_vals
+#learner$param_set
+library("mlr3filters")
+library(mlr3fselect)
+measures = msrs(c("classif.ce", "time_train"))
+evals20 = trm("evals", n_evals = 20)
 
-automl(
-task = c(madeline,madelon),
-learner = "xgboost",
-measures = c("classif_auc","time_train"),
-terminator = ("evals",n_evals = 20)
-filter = "auc"
-)
+instance2 = FSelectInstanceMultiCrit$new( task = madeline_tsk,
+learner = lrn("classif.xgboost"),
+#search_space = search_space,
+resampling = rsmp("cv", folds = 10),
+measures = measures,
+terminator = evals20)
+instance2
 
-##############################################################################
+lgr::get_logger("bbotk")$set_threshold("warn")
+fselector$optimize(instance2)
 
-instance = tune(
-  task = madeline_tsk,
-  method = "grid_search" ,
-  learner = learner,
-  resampling = rsmp("cv", folds = 10),
-  measure = msrs(c("time_train")),
-  terminator = ("evals",n_evals = 20)#,
-#  term_evals = 8
-)
-
-
-
-as_classif
+instance2$result
 
