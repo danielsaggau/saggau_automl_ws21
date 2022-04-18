@@ -3,7 +3,9 @@
 # @input param
 # @
 # @
-
+devtools::install_github("https://github.com/mlr-org/mlr3mbo/")
+library(mlr3mbo)
+library(data.table)
 future::plan("multisession")
 
 set.seed(123)
@@ -26,19 +28,61 @@ resample(task, glrn, cv10)
 
 source("search_space.R")
 
-#uningInstanceSingleCrit$new
+#tuningInstanceSingleCrit$new
 
-instance = tune(
-  method ="mbo",
+instance = TuningInstanceMultiCrit$new(
   task = task,
   learner = glrn,
   resampling = rsmp("cv", folds =10),
   measure = msrs("classif.ce"),
   search_space = search_space,
+  terminator = trm("run_time" ,secs = 60)
+)
+instance
+tuner = tnr("grid_search", resolution = 5)
+tuner$optimize(instance)
+
+
+#
+library(mlr3hyperband)
+instance = tune(
+  method ="hyperband",
+  task = task,
+  learner = glrn ,
+  resampling = rsmp("cv", folds =10),
+  measure = msrs("classif.ce"),
+  search_space = search_space,
   #terminator = trm("run_time" ,secs = 60)
 )
+library(mlr3tuning)
+?TuningInstanceMultiCrit
+instance = TuningInstanceMultiCrit$new(
+  task = task,
+  learner = glrn ,
+  resampling = rsmp("cv", folds =10),
+  measure = msrs(c("classif.ce","selected_features")),
+  search_space = search_space,
+  terminator = trm("run_time" ,secs = 180)
+)
+
+tuner =
+tuner$optimize(instance)
+
+
+
+archive = instance$archive
+archive$nds_selection(n_select=5)
+install.packages("emoa")
+library(emoa)
+?nds_selection()
+plot(instance$result_x_search_space$classif.xgboost.nrounds, instance$result_y$classif.ce)
+
 
 instance$result_learner_param_vals
+instance$result$
+
+instance$nds_selection(n_select=2)
+
 as.data.table(instance$result_learner_param_vals)
 glrn$param_set$values
 

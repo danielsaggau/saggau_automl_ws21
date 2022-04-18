@@ -1,18 +1,32 @@
 #
-source("dataloader.R")
+source("data_loader.R")
 source("automl_pipe.R")
 library("magrittr")
 install.packages("FSelectorRcpp")
 library("FSelectorRcpp")
+library(mlr3)
+library(mlr3pipelines)
+eval = function(task, learner){
+  filter = po("filter", mlr3filters::flt("information_gain"), filter.frac = 0.5)
+  graph = filter %>>% po("learner", learner = lrn(learner))
+  graph_l =  as_learner(graph)
+  cv10 = rsmp("cv", folds = 10)
+  task = task
+  r_base = resample(task, graph_l, cv10,store_models = TRUE)
+  r_base$aggregate(msrs("classif.ce"))
+  as_benchmark_result(r_base)
+}
+
+base_madeline = eval(task = madeline_tsk, learner = "classif.featureless")
+base_madelon = eval(task = madelon_tsk, learner = "classif.featureless")
+ranger_madeline = eval(task = madeline_tsk, learner = "classif.ranger")
+ranger_madelon = eval(task = madelon_tsk, learner = "classif.ranger")
 
 
-
-
-
-
-#po("filter", mlr3filters::flt("variance"), filter.frac = 0.5)
-#filter = po("filter", mlr3filters::flt("selected_features",learner = lrn("classif.featureless")))
-filter = po("filter", mlr3filters::flt("information_gain"), filter.frac = 0.5)
+base_madeline$combine(base_madelon)
+base_madeline$combine(ranger_madelon)
+base_madeline$combine(ranger_madeline)
+base_madeline$aggregate()
 
 set.seed(123)
 ## baseline
@@ -29,12 +43,8 @@ cv10 = rsmp("cv", folds = 10)
 r_base = resample(task, graph_l, cv10,store_models = TRUE)
 r_base$aggregate(msrs("classif.ce"))
 
-r_base$score
-MeasureSelectedFeatures$new()
-l
-scores = r_base$score(msr("selected_features"))
-scores[, c("iteration", "selected_features")]
-r_base$errors
+#scores = r_base$score(msr("selected_features"))
+#scores[, c("iteration", "selected_features")]
 
 r1 = as_benchmark_result(r_base)
 
@@ -71,5 +81,3 @@ ggplot(data = data, aes(x = , y= ))
 ggplot(data = data, aes(x = , y= ))
 + geom_points()
 + labs(y = "number of features", x = "misclassification rate")
-
-

@@ -20,13 +20,13 @@ library(mlr3fselect)
 measures = msrs(c("classif.ce", "time_train"))
 evals20 = trm("evals", n_evals = 20)
 
-instance2 = FSelectInstanceMultiCrit$new( task = madeline_tsk,
-learner = lrn("classif.xgboost"),
+#instance2 = FSelectInstanceMultiCrit$new( task = madeline_tsk,
+#learner = lrn("classif.xgboost"),
 #search_space = search_space,
-resampling = rsmp("cv", folds = 10),
-measures = measures,
-terminator = evals20)
-instance2
+#resampling = rsmp("cv", folds = 10),
+#measures = measures,
+#terminator = evals20)
+#instance2
 
 lgr::get_logger("bbotk")$set_threshold("warn")
 fselector$optimize(instance2)

@@ -7,44 +7,24 @@ madeline = oml_data$data
 madeline_tsk = as_task_classif(
 madeline, target = "class",# predict_type = "prob")
 
+split = function(task){
+  test.idx = sample(seq_len(task$nrow), 30)
+  train.idx = setdiff(seq_len(task$nrow), test.idx)
+  task$row_roles$use = train.idx
+}
 
-test.idx = sample(seq_len(task$nrow), 30)
-train.idx = setdiff(seq_len(task$nrow), test.idx)
-# Set task to only use train indexes
-task$row_roles$use = train.idx
+split(madelon_tsk)
 
-oml_data = OMLData$new(1485)
+oml_data = OMLData$new(1485) # fix overwritting
 madelon = oml_data$data
 
-madelon_tsk = as_task_classif(
-  madelon, target = "Class")
-
-
-#######
-madeline_tsk = as_task_classif(
-  madeline, target = "class")
-
-#madeline_tsk = TaskClassif$new(id ="madeline",
-#                              backend = as_data_backend(madeline),
-#                              target = "class")
-
+madelon_tsk = as_task_classif(madelon, target = "Class")
+madeline_tsk = as_task_classif(madeline, target = "class")
 
 task = madeline_tsk
 test.idx = sample(seq_len(task$nrow), 30)
 train.idx = setdiff(seq_len(task$nrow), test.idx)
 # Set task to only use train indexes
 task$row_roles$use = train.idx
-
-
-#madelon_tsk = TaskClassif$new(id ="madelon",
-#                              backend = as_data_backend(madelon),
-#                              target = "Class")
-
-
-####---------------------------------####---------------------------------
-
-
-
-
 
 
