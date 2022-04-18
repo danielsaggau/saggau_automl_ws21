@@ -60,7 +60,7 @@ instance = TuningInstanceMultiCrit$new(
   task = task,
   learner = glrn ,
   resampling = rsmp("cv", folds =10),
-  measure = msrs(c("classif.ce","selected_features")),
+  measure = msrs(c("classif.ce","subsample.frac")),
   search_space = search_space,
   terminator = trm("run_time" ,secs = 180)
 )

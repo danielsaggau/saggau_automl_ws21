@@ -12,11 +12,12 @@ eval = function(task, learner){
   graph_l =  as_learner(graph)
   cv10 = rsmp("cv", folds = 10)
   task = task
-  r_base = resample(task, graph_l, cv10,store_models = TRUE)
+  r_base = resample(task, graph_l, cv10, store_models = TRUE)
   r_base$aggregate(msrs("classif.ce"))
   as_benchmark_result(r_base)
 }
 
+r_base$aggregate()
 base_madeline = eval(task = madeline_tsk, learner = "classif.featureless")
 base_madelon = eval(task = madelon_tsk, learner = "classif.featureless")
 ranger_madeline = eval(task = madeline_tsk, learner = "classif.ranger")
@@ -29,6 +30,13 @@ base_madeline$combine(ranger_madeline)
 base_madeline$aggregate()
 
 set.seed(123)
+
+scores = base_madeline$aggregate(measures = msrs("subsample.frac"))
+
+scores[, c("iteration", "selected_features")]
+
+subsample.frac
+
 ## baseline
 graph = filter %>>% po("learner", learner = lrn("classif.featureless"))
 graph_l =  as_learner(graph)
