@@ -29,7 +29,7 @@ madeline_tsk = as_task_classif(
 #                              target = "class")
 
 
-
+task = madeline_tsk
 test.idx = sample(seq_len(task$nrow), 30)
 train.idx = setdiff(seq_len(task$nrow), test.idx)
 # Set task to only use train indexes
