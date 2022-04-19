@@ -1,13 +1,17 @@
 # helpers
-#Function: plot_pareto
+# Function: plot_pareto
 # @ Description: Function to plot the pareto set
 # @ param : best which is equal Archive$best(``) result from `bbotk from Instance$Archive
 # @ output ggplot graph
 
-plot_pareto = function(best){
-  ggplot(data = best,
-         aes(y = best$information_gain.filter.frac,
-             x= best$classif.ce)) +
+plot_pareto <- function(best) {
+  ggplot(
+    data = best,
+    aes(
+      y = best$information_gain.filter.frac,
+      x = best$classif.ce
+    )
+  ) +
     geom_point()
 }
 
@@ -16,13 +20,15 @@ plot_pareto = function(best){
 # @ Description  plot the results of the evolutionary algorithm
 # @ param : select which is the  Instance$Archive$nds_selection() output
 # @ output ggplot graph
-plot_nds = function(select){
-  ggplot(data = select,
-         aes(frac,
-             x= select$classif.ce,
-             y = select$information_gain.filter)) +
+plot_nds <- function(select) {
+  ggplot(
+    data = select,
+    aes(frac,
+      x = select$classif.ce,
+      y = select$information_gain.filter
+    )
+  ) +
     geom_point()
-
 }
 
 # asign values of optimization to learner
@@ -31,18 +37,18 @@ plot_nds = function(select){
 # @ param: here we use the output by our automl function
 # @ output: learner with assigned weights
 
-assign = function(instance){
+assign <- function(instance) {
   xgboost <- mlr_pipeops$get("learner", lrn("classif.xgboost"))
   subsample <- po("subsample", frac = 0.7) # use example value of mlr3 book
   filter <- po("filter",
-               filter = mlr3filters::flt("information_gain"),
-               param_vals = list(filter.frac = 0.25)
+    filter = mlr3filters::flt("information_gain"),
+    param_vals = list(filter.frac = 0.25)
   )
   graph <-
     subsample %>>%
     filter %>>%
     po("learner",
-       learner = lrn("classif.xgboost")
+      learner = lrn("classif.xgboost")
     )
   glrn <- as_learner(graph)
   glrn$param_set$values$classif.xgboost.lambda <- instance$result_x_search_space$classif.xgboost.lambda
@@ -64,7 +70,31 @@ eval <- function(task, learner) {
   cv10 <- rsmp("cv")
   task <- task
   r <- resample(task, graph_l, cv10, store_models = TRUE)
-  r = r$score()
+  r <- r$score()
+}
+# Function: Eval as score output
+# @ param task: respective task in R6 Class
+# @ param learner: respective learner in R6 Class
+# @ output resampling score results
+# @ extra eval function for added subsampling
+# @ igmpred here
+eval_sub <- function(task, learner) {
+  subsample <- po("subsample", frac = 0.7) # use example value of mlr3 book
+  filter <- po("filter",
+    mlr3filters::flt("information_gain"),
+    filter.frac = 0.5
+  )
+  graph <-
+    subsample %>>%
+    filter %>>%
+    po("learner",
+      learner = lrn("classif.xgboost")
+    )
+  graph_l <- as_learner(graph)
+  cv10 <- rsmp("cv")
+  task <- task
+  r <- resample(task, graph_l, cv10, store_models = TRUE)
+  r <- r$score()
 }
 
 # @ param task
