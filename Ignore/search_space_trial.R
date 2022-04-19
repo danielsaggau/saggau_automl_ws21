@@ -18,3 +18,5 @@ tuning_space$values
 
 
 # get learner and set learner$param_set
+
+as.data.table(graph_learner$param_set)

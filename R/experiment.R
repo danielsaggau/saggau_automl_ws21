@@ -70,13 +70,8 @@ cv10 = rsmp("cv", folds = 10)
 rr = resample(task, graph_l, cv10)
 rr$aggregate(msr("classif.ce"))
 
-r2 = as_benchmark_result(rr)
 
-
-
-r1$combine(r2)
-r1$aggregate()
-
+## autoplot
 
 ## ggplot to visualize results
 
