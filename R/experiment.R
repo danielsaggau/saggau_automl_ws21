@@ -1,31 +1,48 @@
 #
-source("data_loader.R")
-source("automl_pipe.R")
+source("./R/data_loader.R")
+source("./R/search_space.R")
+source("./R/automl_final.R")
+
 library("magrittr")
-install.packages("FSelectorRcpp")
-library("FSelectorRcpp")
 library(mlr3)
 library(mlr3pipelines)
 library(ranger)
+library(mlr3viz)
+install.packages("patchwork")
+library(patchwork)
+library(ggplot2)
+
+
+madelon = automl(madelon_tsk)
+
+best = madelon$best(n_select=20) # selet 20 points
+
+ggplot(data = best,
+       aes(x = best$information_gain.filter.frac,
+           y= best$classif.ce)) +
+          geom_point()
+
+select = madelon$nds_selection(n_select=10) # select 10 points
+
+ggplot(data = select,
+       aes(frac,
+           y= select$classif.ce,
+           x = select$information_gain.filter)) +
+           geom_point()
 
 eval = function(task, learner){
   filter = po("filter", mlr3filters::flt("information_gain"), filter.frac = 0.5)
   graph = filter %>>% po("learner", learner = lrn(learner))
   graph_l =  as_learner(graph)
-  cv10 = rsmp("cv", folds = 10)
+  cv10 = rsmp("cv")
   task = task
-  r_base = resample(task, graph_l, cv10, store_models = TRUE)
-  r_base$aggregate(msrs("classif.ce"))
-  as_benchmark_result(r_base)
+  resample(task, graph_l, cv10, store_models = TRUE)
+  score = base_madeline$score()
 }
 
-
-pred = r_base$prediction()
-pred$confusion
-
-r_base$aggregate()
 base_madeline = eval(task = madeline_tsk, learner = "classif.featureless")
-base_madelon = eval(task = madelon_tsk, learner = "classif.featureless")
+
+basbase_madelon = eval(task = madelon_tsk, learner = "classif.featureless")
 ranger_madeline = eval(task = madeline_tsk, learner = "classif.ranger")
 ranger_madelon = eval(task = madelon_tsk, learner = "classif.ranger")
 

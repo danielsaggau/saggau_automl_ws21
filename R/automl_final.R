@@ -1,4 +1,5 @@
 # automl function
+# requires mlr3pipelines, mlr3, bbotk, mlr3tuning
 # @param task(``)
 # @param
 # @param
@@ -21,7 +22,7 @@ automl = function(task){
 
   glrn = as_learner(graph)
   glrn$param_set$values$information_gain.filter.frac = 0.25 # set minimum as starting value
-  cv10 = rsmp("cv", folds = 10)
+  cv10 = rsmp("cv", folds = 10) # set cross validation 10 fold
 
 #define objective function
   objective = ObjectiveTuning$new(
@@ -42,6 +43,6 @@ automl = function(task){
   )
 
   tuner = opt("hyperband")
-  return(tuner$optimize(instance))
+  tuner$optimize(instance)
+  return(instance$archive)
 }
-automl(madelon_tsk)
