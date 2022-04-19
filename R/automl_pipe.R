@@ -68,8 +68,6 @@ instance = TuningInstanceMultiCrit$new(
 tuner =
 tuner$optimize(instance)
 
-
-
 archive = instance$archive
 archive$nds_selection(n_select=5)
 install.packages("emoa")
