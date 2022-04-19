@@ -1,112 +1,92 @@
-#
-source("./R/data_loader.R")
-source("./R/search_space.R")
-source("./R/automl_final.R")
-
 library("magrittr")
 library(mlr3)
+library(mlr3tuning)
 library(mlr3pipelines)
 library(ranger)
 library(mlr3viz)
-install.packages("patchwork")
 library(patchwork)
 library(ggplot2)
+library(bbotk)
+library(mlr3)
+require("paradox")
 
+# Call other files
 
-madelon = automl(madelon_tsk)
-
-best = madelon$best(n_select=20) # selet 20 points
-
-ggplot(data = best,
-       aes(x = best$information_gain.filter.frac,
-           y= best$classif.ce)) +
-          geom_point()
-
-select = madelon$nds_selection(n_select=10) # select 10 points
-
-ggplot(data = select,
-       aes(frac,
-           y= select$classif.ce,
-           x = select$information_gain.filter)) +
-           geom_point()
-
-eval = function(task, learner){
-  filter = po("filter", mlr3filters::flt("information_gain"), filter.frac = 0.5)
-  graph = filter %>>% po("learner", learner = lrn(learner))
-  graph_l =  as_learner(graph)
-  cv10 = rsmp("cv")
-  task = task
-  resample(task, graph_l, cv10, store_models = TRUE)
-  score = base_madeline$score()
-}
-
-base_madeline = eval(task = madeline_tsk, learner = "classif.featureless")
-
-basbase_madelon = eval(task = madelon_tsk, learner = "classif.featureless")
-ranger_madeline = eval(task = madeline_tsk, learner = "classif.ranger")
-ranger_madelon = eval(task = madelon_tsk, learner = "classif.ranger")
-
-
-base_madeline$combine(base_madelon)
-base_madeline$combine(ranger_madelon)
-base_madeline$combine(ranger_madeline)
-base_madeline$aggregate()
-base_madeline$score
+source("./R/data_loader.R")
+source("./R/search_space.R")
+source("./R/automl_final.R")
+source("./R/helper.R")
 set.seed(123)
 
-## baseline
-graph = filter %>>% po("learner", learner = lrn("classif.featureless"))
-graph_l =  as_learner(graph)
+# Automl Function, taking task as argument
+madelon <- automl(madelon_tsk)
+learn_madelon <- assign(madelon)
+# select pareto set and hypervolume via bbotk
+madelon <- madelon$archive
+madelon_best <- madelon$best(n_select = 10) # selet 10 points for pareto set; note that actually if the multicrit worked, there should be more than 1 solution but it seems that it did not work
+madelon_select <- madelon$nds_selection(n_select = 10) # select 10 points via evolutionary algorithm for multi-crit optimization and determining hypervolume
 
-#graph_l$train(task, train.idx)$
-#  predict(task, test.idx)$
-#  score()
+# plot pareto front ; call helper function plot_pareto(``)
+plot_pareto(madelon_best) + labs(title = "Pareto Set for Madelon", subtitle="Pareto Set Determined via the `bbotk` package", y = "Relative number of feature measured via `frac.` and information gain filter", x = "Classification Error")
 
-#task = tsks(c("madeline_tsk","madelon_tsk"))
+# plot hypervolume; call helper function plot_ds(``)
+plot_nds(madelon_select)  + labs(title = "NDS Algorithm for Madelon", subtitle ="10 best Configurations using the NDS Algorithm provided by `bbotk`", y = "Relative number of feature measured via frac.and information gain filter", x = "Classification Error")
 
-cv10 = rsmp("cv", folds = 10)
-r_base = resample(task, graph_l, cv10,store_models = TRUE)
-r_base$aggregate(msrs("classif.ce"))
+madeline <- automl(madeline_tsk)
+learn_madeline <- assign(madeline)
+madeline = madeline$archive
+madeline_best <- madeline$best(n_select = 10)
+madeline_select <- madeline$nds_selection(n_select = 10)
 
-#scores = r_base$score(msr("selected_features"))
-#scores[, c("iteration", "selected_features")]
+#  plot pareto front; call helper function plot_pareto(``)
+plot_pareto(madeline_best) + labs(title = "Pareto Set For Madeline", subtitle="Pareto Set Determined via the `bbotk` package", y = "Relative number of feature measured via `frac.` and information gain filter", x = "Classification Error")
+# plot hypervolume; call helper function plot_ds(``)
+plot_nds(madeline_select) + labs(title = "NDS Algorithm For Madeline", subtitle ="10 best Configurations using the NDS Algorithm provided by `bbotk`", y = "Relative number of feature measured via frac.and information gain filter", x = "Classification Error")
 
-r1 = as_benchmark_result(r_base)
-
-## random forest
-graph =
-  po("learner",
-     learner = lrn("classif.ranger"))
-
-graph_l =  as_learner(graph)
-graph_l$train(task, train.idx)$
-  predict(task, test.idx)$
-  score()
-
-cv10 = rsmp("cv", folds = 10)
-rr = resample(task, graph_l, cv10)
-rr$aggregate(msr("classif.ce"))
-
-## ggplot to visualize results
-
-ggplot(data = instance, aes(x= instance$archive$best))
+# function: resample
+# input param: resampling strategy rsmp(``)
+# input param
+cv10 <- rsmp("cv", folds = 10)
+boost_madelon <- resample(cv10, learner = learn_madelon, task = madelon_tsk, store_models = TRUE)
+boost_madeline <- resample(cv10, learner = learn_madeline, task = madeline_tsk, store_models = TRUE)
+boost_madelon_score <- boost_madelon$score()
+boost_madeline_score <- boost_madeline$score()
 
 
-res = instance$archive$nds_selection(n_select = 15)
-ggplot(data = res, aes(res$classif.ce, res$information_gain.filter.frac)) +
-  geom_point() +
-  labs(x = "Classification Error", y = "Informaiton Gain Filter / Relative Number of Features")
+base_madeline <- eval(task = madeline_tsk, learner = "classif.featureless")
+base_madelon <- eval(task = madelon_tsk, learner = "classif.featureless")
+ranger_madeline <- eval(task = madeline_tsk, learner = "classif.ranger")
+ranger_madelon <- eval(task = madelon_tsk, learner = "classif.ranger")
 
+ggplot() +
+  geom_point(data = base_madeline, aes(base_madeline$iteration, base_madeline$classif.ce, colour = "base"), size = 4) +
+  geom_point(data = ranger_madeline, aes(ranger_madeline$iteration, ranger_madeline$classif.ce, colour = "ranger"), size = 4) +
+  geom_point(data = boost_madeline_score, aes(boost_madeline_score$iteration, boost_madeline_score$classif.ce, color = "boost"), size = 4) +
+  labs(x = "Iteration", y = "Classification Error", title = "Madeline Data Set")
 
-ggplot(data = data, aes(x = , y= ))
-          geom_point() +
-          labs(x = "Classification Error", y = "Informaiton Gain Filter / Relative Number of Features")
+ggplot() +
+  geom_point(data = base_madelon, aes(base_madelon$iteration, base_madelon$classif.ce, colour = "base"), size = 4) +
+  geom_point(data = ranger_madelon, aes(ranger_madelon$iteration, ranger_madelon$classif.ce, colour = "ranger"), size = 4) +
+  geom_point(data = boost_madelon_score, aes(boost_madelon_score$iteration, boost_madelon_score$classif.ce, color = "boost"), size = 4) +
+  labs(x = "Iteration", y = "Classification Error", title = "Madelon Data Set")
 
-ggplot(data = data, aes(x = , y= ) +
-         geom_points() +
-          labs(x = "Classification Error", y = "Informaiton Gain Filter / Relative Number of Features")
+# Benchmark
 
+base_madeline_rr <- eval_resample(task = madeline_tsk, learner = "classif.featureless")
+base_madelon_rr <- eval_resample(task = madelon_tsk, learner = "classif.featureless")
+ranger_madeline_rr <- eval_resample(task = madeline_tsk, learner = "classif.ranger")
+ranger_madelon_rr <- eval_resample(task = madelon_tsk, learner = "classif.ranger")
 
-ggplot(data = data, aes(x = , y= ))
-+ geom_points() +
-  labs(x = "Classification Error", y = "Informaiton Gain Filter / Relative Number of Features")
+base_madeline_bm <- as_benchmark_result(base_madeline_rr)
+ranger_madeline_bm <- as_benchmark_result(ranger_madeline_rr)
+base_madelon_bm <- as_benchmark_result(base_madelon_rr)
+ranger_madelon_bm <- as_benchmark_result(ranger_madelon_rr)
+boost_madeline_score_bm <- as_benchmark_result(boost_madeline)
+boost_madelon_score_bm <- as_benchmark_result(boost_madelon)
+
+base_madeline_bm$combine(base_madelon_bm)
+base_madeline_bm$combine(ranger_madelon_bm)
+base_madeline_bm$combine(ranger_madeline_bm)
+base_madeline_bm$combine(boost_madeline_score_bm)
+base_madeline_bm$combine(boost_madelon_score_bm)
+autoplot(base_madeline_bm)

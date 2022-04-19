@@ -16,4 +16,11 @@ Imports:
     bbotk (>= 0.5.2),
     xgboost (>= 1.5.2.1),
     DiceKriging (>= 1.6.0),
+    ranger, 
+    magrittr, 
+    mlr3viz, 
+    patchwork, 
+    ggplot2, 
+    bbotk,
+    paradox
 Encoding: UTF-8
