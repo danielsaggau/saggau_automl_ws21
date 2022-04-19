@@ -1,6 +1,4 @@
 # helpers
-
-
 #Function: plot_pareto
 # @ Description: Function to plot the pareto set
 # @ param : best which is equal Archive$best(``) result from `bbotk from Instance$Archive
