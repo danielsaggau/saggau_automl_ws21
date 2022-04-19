@@ -30,6 +30,7 @@ plot_nds = function(select){
 # asign values of optimization to learner
 # @ Description
 # @ param: instance object from `bbotk
+# @ param: here we use the output by our automl function
 # @ output: learner with assigned weights
 
 assign = function(instance){

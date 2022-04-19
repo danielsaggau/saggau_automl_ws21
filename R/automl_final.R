@@ -4,7 +4,7 @@
 # @param task(``) respective task needed
 # Method Tuner: Hyperband
 # @ Output Optimizer results
-# @ Output Note: We pass these on to the assign function to transfer the tuned hyperparameters to
+# @ Output Note: We pass these on to the assign function to transfer the tuned hyperparameters to the learner
 # Note: budget parameter specified in search space
 
 automl <- function(task) {
