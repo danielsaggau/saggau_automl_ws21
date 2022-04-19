@@ -9,6 +9,7 @@ library(data.table)
 future::plan("multisession")
 
 set.seed(123)
+
 xgboost = mlr_pipeops$get("learner", lrn("classif.xgboost", eval_metric ="logloss"))
 filter = po("filter",
              filter = mlr3filters::flt("variance"),
