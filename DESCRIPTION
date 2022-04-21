@@ -5,7 +5,7 @@ Authors@R:
   person(given = "Daniel", 
          family = "Saggau", 
          email = daniel.saggau@gmail.com)
-Desctiption:
+Description: automl package
 Depends:
     R (>= 3.1.0)
 Imports:
