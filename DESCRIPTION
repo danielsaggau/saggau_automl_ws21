@@ -16,6 +16,8 @@ Imports:
     bbotk (>= 0.5.2),
     xgboost (>= 1.5.2.1),
     DiceKriging (>= 1.6.0),
+    mlr3hyperband,
+    mlr3pipelines,
     ranger, 
     magrittr, 
     mlr3viz, 
